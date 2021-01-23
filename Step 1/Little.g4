@@ -8,4 +8,3 @@ IDENTIFIER: [a-z][a-z0-9]*;
 INTLITERAL: [0-9]+;
 FLOATLITERAL: [0-9]*'.'[0-9]+;
 STRINGLITERAL: '"'[ -~]*'"';
-program: 'PROGRAM' IDENTIFIER;
