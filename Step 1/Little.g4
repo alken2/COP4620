@@ -2,6 +2,7 @@ grammar Little;
 KEYWORD: 'PROGRAM'|'BEGIN'|'END'|'FUNCTION'|'READ'|'WRITE'|'IF'|'ELSE'|'ENDIF'|'WHILE'|'ENDWHILE'|'CONTINUE'|'BREAK'|
 'RETURN'|'INT'|'VOID'|'STRING'|'FLOAT';
 OPEATORS: ':=' | '+' | '-' | '*' | '/' | '=' | '!=' | '<' | '>' | '(' | ')' | ';' | ',' | '<=' | '>='; 
+LINE_COMMENT : '--' [\r\n] -> skip;
 WS: [ \t\r\n]+ -> skip;
 IDENTIFIER: [a-z][a-z0-9]*;
 INTLITERAL: [0-9]+;
