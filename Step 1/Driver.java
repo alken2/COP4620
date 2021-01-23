@@ -13,7 +13,7 @@ public class Driver {
 
         Token token = lexer.nextToken();
         while (token.getType() != Little.EOF) {
-            System.out.println("\t" + getTokenType(token.getType()) + "\t\t" + token.getText());
+            System.out.println("Token Type: " + getTokenType(token.getType()) + "\nValue: " + token.getText());
             token = lexer.nextToken();
         }
     }
