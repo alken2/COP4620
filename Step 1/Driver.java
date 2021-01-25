@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.Vocabulary;
 import java.io.IOException;
 
 public class Driver {
-
     public static void main(String[] args) {
         String filename = args[0];
         System.out.println("Parsing: " + filename);
