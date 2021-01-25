@@ -1,45 +1,31 @@
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.Vocabulary;
+
+import java.io.IOException;
 
 public class Driver {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         String filename = args[0];
         System.out.println("Parsing: " + filename);
-        CharStream input = CharStreams.fromFileName(filename);
-        Little lexer = new Little(input);
-
-        Token token = lexer.nextToken();
-        while (token.getType() != Little.EOF) {
-            System.out.println("Token Type: " + getTokenType(token.getType()) + "\nValue: " + token.getText());
-            token = lexer.nextToken();
+        CharStream input = null;
+        try {
+            input = CharStreams.fromFileName(filename);
         }
-    }
-
-    private static String getTokenType(int tokenType) {
-        switch (tokenType) {
-            case Little.KEYWORD:
-                return "KEYWORD";
-            case Little.OPEATOR:
-                return "OPERATOR";
-            /*
-            case Little.COMMENT:
-                return "COMMENT";
-            case Little.WS:
-                return "WS";
-            */
-            case Little.IDENTIFIER:
-                return "IDENTIFIER";
-            case Little.INTLITERAL:
-                return "INTLITERAL";
-            case Little.FLOATLITERAL:
-                return "FLOATLITERAL";
-            case Little.STRINGLITERAL:
-                return "STRINGLITERAL";
-            default:
-                return "OTHER";
+        catch (IOException e) {
+            System.out.println("File not found: " + filename);
+            System.exit(1);
+        }
+        Little lexer = new Little(input);
+        Token token = lexer.nextToken();
+        Vocabulary v = lexer.getVocabulary();
+        while (token.getType() != Little.EOF) {
+            System.out.println("Token Type: " + v.getSymbolicName(token.getType()));
+            System.out.println("Value: "+ token.getText());
+            token = lexer.nextToken();
         }
     }
 }
