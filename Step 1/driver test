@@ -1,0 +1,22 @@
+import org.antlr.v4.runtime.*;
+
+public class Driver {
+    public static void main(String[] args) throws Exception {
+        String t=null;
+        if(args.length>0)t=args[0];
+        
+            CharStream input = CharStreams.fromFileName(t);
+            Little lexer = new Little(input);
+
+
+            Token token = lexer.nextToken();
+            Vocabulary v = lexer.getVocabulary();
+
+        while (token.getType() != token.EOF)
+        {
+            System.out.println("Token Type: " +v.getSymbolicName(token.getType()));
+            System.out.println("Value: "+token.getText());
+            token = lexer.nextToken();
+        }
+    }
+}
