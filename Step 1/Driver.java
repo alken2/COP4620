@@ -20,12 +20,12 @@ public class Driver {
             System.exit(1);
         }
         Little lexer = new Little(input);
-        Token token = lexer.nextToken();
+        Token t = lexer.nextToken();
         Vocabulary v = lexer.getVocabulary();
-        while (token.getType() != Little.EOF) {
-            myWriter.write("Token Type: " + v.getSymbolicName(token.getType()));
-            myWriter.write("\nValue: "+ token.getText()+ "\n");
-            token = lexer.nextToken();
+        while (t.getType() != Little.EOF) {
+            myWriter.write("Token Type: " + v.getSymbolicName(t.getType()));
+            myWriter.write("\nValue: "+ t.getText()+ "\n");
+            t = lexer.nextToken();
         }
         myWriter.close();
     }
