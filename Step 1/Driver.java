@@ -9,24 +9,17 @@ import java.io.IOException;
 public class Driver {
     public static void main(String[] args) throws IOException {
         String filename = args[0];
-        CharStream input = null;
-        File outputs = new File("outputs.txt");
-        FileWriter myWriter = new FileWriter("outputs.txt");
-        try {
-            input = CharStreams.fromFileName(filename);
-        }
-        catch (IOException e) {
-            System.out.println("File not found: " + filename);
-            System.exit(1);
-        }
+        CharStream input = CharStreams.fromFileName(filename);
+        File outputs = new File("outputs.txt"); //never used
+        FileWriter writer = new FileWriter("outputs.txt");
         Little lexer = new Little(input);
         Token t = lexer.nextToken();
         Vocabulary v = lexer.getVocabulary();
         while (t.getType() != Little.EOF) {
-            myWriter.write("Token Type: " + v.getSymbolicName(t.getType()));
-            myWriter.write("\nValue: "+ t.getText()+ "\n");
+            writer.write("Token Type: " + v.getSymbolicName(t.getType()));
+            writer.write("\nValue: "+ t.getText()+ "\n");
             t = lexer.nextToken();
         }
-        myWriter.close();
+        writer.close();
     }
 }
