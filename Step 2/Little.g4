@@ -58,7 +58,7 @@ primary: '(' expr ')' | id | INTLITERAL | FLOATLITERAL;
 addop: '+' | '-';
 mulop: '*' | '/';
 /* Complex Statements and Condition */
-if_stmt: 'IF' '(' cond ') 'decl stmt_list else_part 'ENDIF';
+if_stmt: 'IF' '(' cond ')' decl stmt_list else_part 'ENDIF';
 else_part: 'ELSE' decl stmt_list | ;
 cond: expr compop expr;
 compop: '<' | '>' | '=' | '!=' | '<=' | '>=';
