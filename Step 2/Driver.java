@@ -1,5 +1,3 @@
-import gen.LittleLexer;
-import gen.LittleParser;
 import org.antlr.v4.runtime.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -29,7 +27,7 @@ public class Driver {
             System.out.println("Accepted");
         }
         else {
-            System.out.println("Not Accepted");
+            System.out.println("Not accepted");
         }
     }
 }
