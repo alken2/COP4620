@@ -5,10 +5,9 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    private final Stack<Map.Entry<String, BinaryNode>> nodeStack = new Stack<>();
+    private final Stack<BinaryNode> nodeStack = new Stack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private BinaryNode syntaxTree;
-    private String something;
 
     public Listener() {}
 
@@ -17,9 +16,6 @@ public class Listener extends LittleBaseListener {
     }
     public BinaryNode getSyntaxTree() {
         return syntaxTree;
-    }
-    public String getSomething() {
-        return something;
     }
 
     private void addScope(String scope) {
@@ -41,18 +37,12 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitProgram(LittleParser.ProgramContext ctx) {
-        AbstractMap.SimpleEntry<String, BinaryNode> pgm = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
-        AbstractMap.SimpleEntry<String, BinaryNode> id = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
-        if (!pgm.getKey().equals("pgm_bdy") || !id.getKey().equals("id")) {
-            System.out.println("Error: Line 47 in Listener.java");
-        }
-        else {
-            syntaxTree = pgm.getValue();
-            something = pgm.getKey();
-            while (!nodeStack.empty()) {
-                System.out.println("Error: nodeStack is not empty!");
-                nodeStack.pop();
-            }
+        BinaryNode pgm = nodeStack.pop();
+        nodeStack.pop(); // testId
+        syntaxTree = pgm;
+        while (!nodeStack.empty()) {
+            System.out.println("Error: testNodeStack is not empty!");
+            nodeStack.pop();
         }
     }
 
@@ -69,11 +59,15 @@ public class Listener extends LittleBaseListener {
         else {
             bn = new BinaryNode(ctx.getChild(0).getText());
         }
-        nodeStack.push(new AbstractMap.SimpleEntry<>("id", bn));
+        nodeStack.push(bn);
     }
 
     @Override public void enterString_decl(LittleParser.String_declContext ctx) {
         insertSymbol(ctx.getChild(1).getText(), ctx.getChild(0).getText(), ctx.getChild(3).getText());
+    }
+
+    @Override public void exitString_decl(LittleParser.String_declContext ctx) {
+        nodeStack.pop();
     }
 
     @Override public void enterVar_decl(LittleParser.Var_declContext ctx) {
@@ -84,8 +78,46 @@ public class Listener extends LittleBaseListener {
         }
     }
 
+    @Override public void exitVar_decl(LittleParser.Var_declContext ctx) {
+        nodeStack.pop();
+    }
+    @Override public void exitId_list(LittleParser.Id_listContext ctx) {
+        BinaryNode id_tail = nodeStack.pop();
+        BinaryNode id = nodeStack.pop();
+        BinaryNode newNode = new BinaryNode("id_list", id, id_tail);
+        nodeStack.push(newNode);
+    }
+
+    @Override public void exitId_tail(LittleParser.Id_tailContext ctx) {
+        if (ctx.getChildCount() == 3) {
+            BinaryNode id_tail = nodeStack.pop();
+            BinaryNode id = nodeStack.pop();
+            BinaryNode newNode = new BinaryNode("id_list", id, id_tail);
+            nodeStack.push(newNode);
+        }
+        else {
+            nodeStack.push(new BinaryNode(""));
+        }
+    }
+
     @Override public void enterParam_decl(LittleParser.Param_declContext ctx) {
         insertSymbol(ctx.getChild(1).getText(), ctx.getChild(0).getText(), null);
+    }
+
+    @Override public void exitFunc_declarations(LittleParser.Func_declarationsContext ctx) {
+        if (ctx.getChildCount() == 2) {
+            BinaryNode func_declarations = nodeStack.pop();
+            BinaryNode func_decl = nodeStack.pop();
+            /*
+            BinaryNode
+            BinaryNode newNode = new BinaryNode("id_list", id, id_tail);
+            */
+            //BinaryNode newTestNode = new BinaryNode("id_list", testId, testId_tail);
+            //testNodeStack.push(newTestNode);
+        }
+        else {
+            nodeStack.push(new BinaryNode(""));
+        }
     }
 
     @Override public void enterFunc_decl(LittleParser.Func_declContext ctx) {
@@ -97,26 +129,13 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitPrimary(LittleParser.PrimaryContext ctx) {
-        AbstractMap.SimpleEntry<String, BinaryNode> simple = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.peek();
         if (ctx.getChildCount() == 1) {
-            if (simple.getKey().equals("id")) {
-                nodeStack.pop();
-                nodeStack.push(new AbstractMap.SimpleEntry<>("primary", simple.getValue()));
+            if (ctx.getChild(0).getText().contains(".")) {
+                nodeStack.push(new BinaryNode("FLOAT:" + ctx.getChild(0).getText()));
             }
             else {
-                if (ctx.getChild(0).getText().contains(".")) {
-                    BinaryNode bn = new BinaryNode("FLOAT:" + ctx.getChild(0).getText());
-                    nodeStack.push(new AbstractMap.SimpleEntry<>("primary", bn));
-                }
-                else {
-                    BinaryNode bn = new BinaryNode("INT:" + ctx.getChild(0).getText());
-                    nodeStack.push(new AbstractMap.SimpleEntry<>("primary", bn));
-                }
+                nodeStack.push(new BinaryNode("INT:" + ctx.getChild(0).getText()));
             }
-        }
-        else {
-            nodeStack.pop();
-            nodeStack.push(new AbstractMap.SimpleEntry<>("primary", simple.getValue()));
         }
     }
 
