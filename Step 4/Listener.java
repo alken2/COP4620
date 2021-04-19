@@ -69,9 +69,6 @@ public class Listener extends LittleBaseListener {
         else {
             bn = new BinaryNode(ctx.getChild(0).getText());
         }
-        Map<BinaryNode, String> m = new HashMap<>();
-        m.put(bn, "id");
-        Map.Entry<BinaryNode, String> entry =
         nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "id"));
     }
 
@@ -110,13 +107,11 @@ public class Listener extends LittleBaseListener {
             else {
                 if (ctx.getChild(0).getText().contains(".")) {
                     BinaryNode bn = new BinaryNode("FLOAT:" + ctx.getChild(0).getText());
-                    AbstractMap.SimpleEntry<BinaryNode, String> entry = new AbstractMap.SimpleEntry<>(bn, "primary");
-                    nodeStack.push(entry);
+                    nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "primary"));
                 }
                 else {
                     BinaryNode bn = new BinaryNode("INT:" + ctx.getChild(0).getText());
-                    AbstractMap.SimpleEntry<BinaryNode, String> entry = new AbstractMap.SimpleEntry<>(bn, "primary");
-                    nodeStack.push(entry);
+                    nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "primary"));
                 }
             }
         }
