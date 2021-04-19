@@ -5,7 +5,7 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    private final Stack<Map.Entry<BinaryNode, String>> nodeStack = new Stack<>();
+    private final Stack<Map.Entry<String, BinaryNode>> nodeStack = new Stack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private BinaryNode syntaxTree;
     private String something;
@@ -41,14 +41,14 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitProgram(LittleParser.ProgramContext ctx) {
-        AbstractMap.SimpleEntry<BinaryNode, String> pgm = (AbstractMap.SimpleEntry<BinaryNode, String>) nodeStack.pop();
-        AbstractMap.SimpleEntry<BinaryNode, String> id = (AbstractMap.SimpleEntry<BinaryNode, String>) nodeStack.pop();
+        AbstractMap.SimpleEntry<String, BinaryNode> pgm = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
+        AbstractMap.SimpleEntry<String, BinaryNode> id = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
         if (!pgm.getValue().equals("pgm_bdy") || !id.getValue().equals("id")) {
             System.out.println("Error: Line 47 in Listener.java");
         }
         else {
-            syntaxTree = pgm.getKey();
-            something = pgm.getValue();
+            syntaxTree = pgm.getValue();
+            something = pgm.getKey();
             while (!nodeStack.empty()) {
                 System.out.println("Error: nodeStack is not empty!");
                 nodeStack.pop();
@@ -69,7 +69,7 @@ public class Listener extends LittleBaseListener {
         else {
             bn = new BinaryNode(ctx.getChild(0).getText());
         }
-        nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "id"));
+        nodeStack.push(new AbstractMap.SimpleEntry<>("id", bn));
     }
 
     @Override public void enterString_decl(LittleParser.String_declContext ctx) {
@@ -97,28 +97,26 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitPrimary(LittleParser.PrimaryContext ctx) {
-        AbstractMap.SimpleEntry<BinaryNode, String> simple = (AbstractMap.SimpleEntry<BinaryNode, String>) nodeStack.peek();
+        AbstractMap.SimpleEntry<String, BinaryNode> simple = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.peek();
         if (ctx.getChildCount() == 1) {
-            if (simple.getValue().equals("id")) {
-                simple.setValue("primary");
+            if (simple.getKey().equals("id")) {
                 nodeStack.pop();
-                nodeStack.push(simple);
+                nodeStack.push(new AbstractMap.SimpleEntry<>("primary", simple.getValue()));
             }
             else {
                 if (ctx.getChild(0).getText().contains(".")) {
                     BinaryNode bn = new BinaryNode("FLOAT:" + ctx.getChild(0).getText());
-                    nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "primary"));
+                    nodeStack.push(new AbstractMap.SimpleEntry<>("primary", bn));
                 }
                 else {
                     BinaryNode bn = new BinaryNode("INT:" + ctx.getChild(0).getText());
-                    nodeStack.push(new AbstractMap.SimpleEntry<>(bn, "primary"));
+                    nodeStack.push(new AbstractMap.SimpleEntry<>("primary", bn));
                 }
             }
         }
         else {
-            simple.setValue("primary");
             nodeStack.pop();
-            nodeStack.push(simple);
+            nodeStack.push(new AbstractMap.SimpleEntry<>("primary", simple.getValue()));
         }
     }
 
