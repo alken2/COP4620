@@ -43,7 +43,7 @@ public class Listener extends LittleBaseListener {
     @Override public void exitProgram(LittleParser.ProgramContext ctx) {
         AbstractMap.SimpleEntry<String, BinaryNode> pgm = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
         AbstractMap.SimpleEntry<String, BinaryNode> id = (AbstractMap.SimpleEntry<String, BinaryNode>) nodeStack.pop();
-        if (!pgm.getValue().equals("pgm_bdy") || !id.getValue().equals("id")) {
+        if (!pgm.getKey().equals("pgm_bdy") || !id.getKey().equals("id")) {
             System.out.println("Error: Line 47 in Listener.java");
         }
         else {
