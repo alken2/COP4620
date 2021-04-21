@@ -1,17 +1,16 @@
-public class BinaryNode {
+public class BinaryNode extends AbstractNode {
     //Data Fields
-    private String element;
-    private BinaryNode left;
-    private BinaryNode right;
+    private final BinaryNode left;
+    private final BinaryNode right;
 
     //Constructors
     BinaryNode(String element) {
-        this.element = element;
+        super(element);
         left = right = null;
     }
 
     BinaryNode(String element, BinaryNode left, BinaryNode right) {
-        this.element = element;
+        super(element);
         this.left = left;
         this.right = right;
     }
@@ -19,6 +18,30 @@ public class BinaryNode {
     //Methods
     public String getElement() {
         return element;
+    }
+
+    protected void print() {
+        System.out.println("Element: " + this.getElement());
+        if (!this.isLeaf()) {
+            System.out.println("Left Node of " + this.getElement());
+            assert this.left != null;
+            print(this.left);
+            System.out.println("Right Node of " + this.getElement());
+            assert this.right != null;
+            print(this.right);
+        }
+    }
+
+    public void print(BinaryNode bn) {
+        System.out.println("Element: " + bn.getElement());
+        if (!bn.isLeaf()) {
+            System.out.println("Left Node of " + bn.getElement());
+            assert bn.left != null;
+            print(bn.left);
+            System.out.println("Right Node of " + bn.getElement());
+            assert bn.right != null;
+            print(bn.right);
+        }
     }
 
     public BinaryNode getLeft() {
