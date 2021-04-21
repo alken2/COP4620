@@ -10,5 +10,7 @@ public abstract class AbstractNode {
     //Methods
     protected abstract String getElement();
 
+    protected abstract AbstractNode getChild(int index);
+
     protected abstract void print();
 }
