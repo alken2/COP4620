@@ -20,6 +20,18 @@ public class BinaryNode extends AbstractNode {
         return element;
     }
 
+    public AbstractNode getChild(int index) {
+        if (index == 0) {
+            return getLeft();
+        }
+        if (index == 1) {
+            return getRight();
+        }
+        else {
+            return null;
+        }
+    }
+
     protected void print() {
         System.out.println("Element: " + this.getElement());
         if (!this.isLeaf()) {
