@@ -19,11 +19,20 @@ public class ScopeNode extends AbstractNode {
         return element;
     }
 
+    public AbstractNode getChild(int index) {
+        if (index < numChildren() && index >= 0) {
+            return children.get(index);
+        }
+        else {
+            return null;
+        }
+    }
+
     public void print() {
         System.out.println("Element: " + this.getElement());
         for (int i = 0; i < children.size(); i++) {
             System.out.println("Child node of " + this.getElement() + ": Index " + i);
-            this.getChildren(i).print();
+            this.getChild(i).print();
         }
     }
 
@@ -31,9 +40,7 @@ public class ScopeNode extends AbstractNode {
         this.children.add(child);
     }
 
-    public AbstractNode getChildren(int index) {
-        return children.get(index);
+    public int numChildren() {
+        return children.size();
     }
-
-
 }
