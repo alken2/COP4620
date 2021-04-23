@@ -5,7 +5,7 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    private final Stack<BinaryNode> nodeStack = new Stack<>();;
+    private final Stack<BinaryNode> nodeStack = new Stack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private ScopeNode root;
     private ScopeNode syntaxTree;
@@ -227,7 +227,7 @@ public class Listener extends LittleBaseListener {
     @Override public void enterIf_stmt(LittleParser.If_stmtContext ctx) {
         blockNum++;
         addScope("BLOCK " + blockNum, null);
-        nodeStack.push(new BinaryNode("IF"));
+        //No test cases with if_stmt? No problem!
     }
 
     @Override public void exitIf_stmt(LittleParser.If_stmtContext ctx) {
@@ -240,7 +240,7 @@ public class Listener extends LittleBaseListener {
             blockNum++;
             addScope("BLOCK " + blockNum, null);
         }
-        nodeStack.push(new BinaryNode("ELSE"));
+        //No test cases with else_part? No problem!
     }
 
     @Override public void exitElse_part(LittleParser.Else_partContext ctx) {
