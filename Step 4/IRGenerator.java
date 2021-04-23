@@ -11,21 +11,20 @@ public class IRGenerator {
         ir.add(";IR code");
         ir.add(";LABEL main");
         ir.add(";LINK");
-        ir.addAll(processTree(sn));
+        ir.addAll(processTree(sn, new ArrayList<>()));
         ir.add(";RET");
         return ir;
     }
 
-    private ArrayList<String> processTree(ScopeNode sn) {
-        ArrayList<String> treeStrings = new ArrayList<>();
+    private ArrayList<String> processTree(ScopeNode sn, ArrayList<String> treeStrings) {
         for (int i = 0; i < sn.numChildren() - 1; i++) {
             if (sn.getChild(i) instanceof BinaryNode) {
-                ArrayList<String> bnStrings = processBinaryTree((BinaryNode)sn.getChild(i));
+                ArrayList<String> bnStrings = processBinaryTree((BinaryNode)sn.getChild(i), treeStrings);
                 //Do things to make bnStrings ready to add to treeStrings
                 treeStrings.addAll(bnStrings);
             }
             else {
-                ArrayList<String> snStrings = processTree((ScopeNode)sn.getChild(i));
+                ArrayList<String> snStrings = processTree((ScopeNode)sn.getChild(i), treeStrings);
                 //Do things to make snStrings ready to add to treeStrings
                 treeStrings.addAll(snStrings);
             }
@@ -34,15 +33,14 @@ public class IRGenerator {
         return treeStrings;
     }
 
-    private ArrayList<String> processBinaryTree(BinaryNode bn) {
-        ArrayList<String> binaryTreeStrings = new ArrayList<>();
+    private ArrayList<String> processBinaryTree(BinaryNode bn, ArrayList<String> treeStrings) {
         if (bn.isLeaf()) {
             if (bn.getElement().equals("")) {
                 return null;
             }
             // strArr[0] = name | INTLITERAL | FLOATLITERAL
-            // strArr[1] = type |
-            // strArr[2] = value |
+            // strArr[1] = type
+            // strArr[2] = value
             String[] strArr = bn.getElement().split(":");
             //Do things with strArr
             ArrayList<String> strings = new ArrayList<>();
@@ -51,18 +49,18 @@ public class IRGenerator {
         }
         // 4-function operations
         if (bn.getElement().equals("+") || bn.getElement().equals("-") || bn.getElement().equals("*") || bn.getElement().equals("/")) {
-            ArrayList<String> right = processBinaryTree(bn.getRight());
-            ArrayList<String> left = processBinaryTree(bn.getLeft());
+            ArrayList<String> right = processBinaryTree(bn.getRight(), treeStrings);
+            ArrayList<String> left = processBinaryTree(bn.getLeft(), treeStrings);
             // TBD
             return right; // Placeholder
         }
         // assignment
         if (bn.getElement().equals("assign_expr")) {
-            ArrayList<String> right = processBinaryTree(bn.getRight());
-            ArrayList<String> left = processBinaryTree(bn.getLeft());
+            ArrayList<String> right = processBinaryTree(bn.getRight(), treeStrings);
+            ArrayList<String> left = processBinaryTree(bn.getLeft(), treeStrings);
             // TBD
             return right; // Placeholder
         }
-        return binaryTreeStrings;
+        return treeStrings;
     }
 }
