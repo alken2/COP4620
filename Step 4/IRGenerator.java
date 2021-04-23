@@ -8,11 +8,9 @@ public class IRGenerator {
 
     public ArrayList<String> createIR(ScopeNode sn) {
         root = sn;
-        ir.add(";IR code");
-        ir.add(";LABEL main");
-        ir.add(";LINK");
+        ir.add("IR code");
         ir.addAll(processTree(sn, new ArrayList<>()));
-        ir.add(";RET");
+        ir.add("RET");
         return ir;
     }
 
@@ -24,6 +22,10 @@ public class IRGenerator {
                 treeStrings.addAll(bnStrings);
             }
             else {
+                String[] strings = sn.getChild(i).getElement().split(":");
+                String scope = strings[0];
+                treeStrings.add("LABEL " + scope);
+                treeStrings.add("LINK");
                 ArrayList<String> snStrings = processTree((ScopeNode)sn.getChild(i), treeStrings);
                 //Do things to make snStrings ready to add to treeStrings
                 treeStrings.addAll(snStrings);
