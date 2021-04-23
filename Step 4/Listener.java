@@ -5,7 +5,7 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    private final Stack<BinaryNode> nodeStack = new Stack<>();
+    private final Stack<BinaryNode> nodeStack = new Stack<>();;
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private ScopeNode root;
     private ScopeNode syntaxTree;
@@ -23,7 +23,7 @@ public class Listener extends LittleBaseListener {
         nestedST.put(scope, new SymbolTable(scope));
         scopeStack.push(scope);
         if (funcStrings != null) {
-            syntaxTree.addChild(new ScopeNode(funcStrings.get(0) + ":" + funcStrings.get(1) + ";" + funcStrings.get(2)));
+            syntaxTree.addChild(new ScopeNode(funcStrings.get(0) + ":" + funcStrings.get(1) + ";"));
         }
         else {
             syntaxTree.addChild(new ScopeNode(scope));
@@ -51,12 +51,6 @@ public class Listener extends LittleBaseListener {
                     indexStack.pop();
                 }
             }
-            /*
-            if (indexStack.empty()) {
-                System.out.println("Fatal error: compilation failed at " + syntaxTree.getElement());
-                System.exit(1);
-            }
-            */
             if (indexStack.empty()) {
                 return;
             }
@@ -81,7 +75,6 @@ public class Listener extends LittleBaseListener {
 
     @Override public void exitProgram(LittleParser.ProgramContext ctx) {
         scopeStack.pop();
-        //BinaryNode pgm = nodeStack.pop();
         nodeStack.pop();
         syntaxTree = root;
         while (!nodeStack.empty()) {
@@ -113,8 +106,6 @@ public class Listener extends LittleBaseListener {
             bn = new BinaryNode( "id:" + ctx.getChild(0).getText());
             nodeStack.push(bn);
         }
-        //bn = new BinaryNode( "FUNCTION:" + ctx.getChild(0).getText());
-        //just have the function declaration deal with this and return
     }
 
     @Override public void enterString_decl(LittleParser.String_declContext ctx) {
@@ -122,7 +113,6 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitString_decl(LittleParser.String_declContext ctx) {
-        //nodeStack.pop();
         syntaxTree.addChild(nodeStack.pop());
     }
 
@@ -135,20 +125,9 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitVar_decl(LittleParser.Var_declContext ctx) {
-        //nodeStack.pop();
-        //syntaxTree.addChild(nodeStack.pop()); //uncomment if exitId_list is uncommented
         BinaryNode id_tail = nodeStack.pop();
         BinaryNode id = nodeStack.pop();
         syntaxTree.addChild(new BinaryNode("var_decl", id, id_tail));
-    }
-
-    @Override public void exitId_list(LittleParser.Id_listContext ctx) {
-        /*
-        BinaryNode id = nodeStack.pop();
-        BinaryNode id_tail = nodeStack.pop();
-        BinaryNode newNode = new BinaryNode("id_list", id, id_tail);
-        nodeStack.push(newNode);
-        */
     }
 
     @Override public void exitId_tail(LittleParser.Id_tailContext ctx) {
@@ -156,26 +135,6 @@ public class Listener extends LittleBaseListener {
             BinaryNode id_tail = nodeStack.pop();
             BinaryNode id = nodeStack.pop();
             nodeStack.push(new BinaryNode("id_tail", id, id_tail));
-            /*
-            BinaryNode newNode;
-            Stack<String> stringStack = new Stack<>();
-            ArrayList<String> symbol = nestedST.get(scopeStack.peek()).getValue(ctx.getChild(1).getText());
-            while (symbol == null && !scopeStack.empty()) {
-                stringStack.push(scopeStack.pop());
-                symbol = nestedST.get(stringStack.peek()).getValue(ctx.getChild(1).getText());
-            }
-            while (!stringStack.empty()) {
-                scopeStack.push(stringStack.pop());
-            }
-            if (symbol != null) {
-                BinaryNode bn = new BinaryNode("id:" + ctx.getChild(1).getText());
-                newNode = new BinaryNode("id_tail", bn, id_tail);
-            }
-            else {
-                newNode = new BinaryNode("id_tail", id, id_tail);
-            }
-            nodeStack.push(newNode);
-            */
         }
         else {
             nodeStack.push(new BinaryNode(""));
@@ -201,56 +160,17 @@ public class Listener extends LittleBaseListener {
         ArrayList<String> funcStrings = new ArrayList<>();
         funcStrings.add(ctx.getChild(1).getText());
         funcStrings.add(ctx.getChild(2).getText());
-        funcStrings.add(ctx.getChild(4).getText()/*.replaceAll("\\(\\)","")*/); // Doesn't work, parameters aren't loaded
         addScope(ctx.getChild(2).getText(), funcStrings);
     }
 
     @Override public void exitFunc_decl(LittleParser.Func_declContext ctx) {
-        /*
         removeScope();
-        //TBD
-        BinaryNode id = nodeStack.pop();
-        BinaryNode func_body = nodeStack.pop();
-        nodeStack.push(new BinaryNode("FUNCTION " + ctx.getChild(1).getText() + " " + ctx.getChild(2).getText(), id, func_body));
-        */
-    }
-
-    @Override public void exitStmt_list(LittleParser.Stmt_listContext ctx) {
-        /*
-        if (ctx.getChildCount() == 0) {
-            nodeStack.push(new BinaryNode(""));
-        }
-        else {
-            BinaryNode stmt = nodeStack.pop();
-            BinaryNode stmt_list = nodeStack.pop();
-            nodeStack.push(new BinaryNode("statement_list", stmt, stmt_list));
-        }
-        */
     }
 
     @Override public void exitAssign_expr(LittleParser.Assign_exprContext ctx) {
         BinaryNode expr = nodeStack.pop();
         BinaryNode id = nodeStack.pop();
         syntaxTree.addChild(new BinaryNode("assign_expr", id, expr));
-        /*
-        Stack<String> stringStack = new Stack<>();
-        ArrayList<String> symbol = nestedST.get(scopeStack.peek()).getValue(ctx.getChild(0).getText());
-        while (symbol == null && !scopeStack.empty()) {
-            stringStack.push(scopeStack.pop());
-            symbol = nestedST.get(stringStack.peek()).getValue(ctx.getChild(0).getText());
-        }
-        while (!stringStack.empty()) {
-            scopeStack.push(stringStack.pop());
-        }
-        if (symbol != null) {
-            BinaryNode bn = new BinaryNode("id:" + ctx.getChild(0).getText());
-            syntaxTree.addChild(new BinaryNode("assign_expr", bn, expr));
-        }
-        else {
-            syntaxTree.addChild(new BinaryNode("assign_expr", id, expr));
-        }
-        */
-        //nodeStack.push(new BinaryNode("assign_expr", id, expr));
     }
 
     @Override public void exitRead_stmt(LittleParser.Read_stmtContext ctx) {
@@ -258,7 +178,6 @@ public class Listener extends LittleBaseListener {
         String[] strings = nodeStack.pop().getElement().split(" ");
         BinaryNode bn = new BinaryNode("id:" + strings[1]);
         syntaxTree.addChild(new BinaryNode("READ", bn, id_tail));
-        //nodeStack.push(new BinaryNode("READ", id, id_tail));
     }
 
     @Override public void exitWrite_stmt(LittleParser.Write_stmtContext ctx) {
@@ -266,22 +185,9 @@ public class Listener extends LittleBaseListener {
         String[] strings = nodeStack.pop().getElement().split(" ");
         BinaryNode bn = new BinaryNode("id:" + strings[1]);
         syntaxTree.addChild(new BinaryNode("WRITE", bn, id_tail));
-        //nodeStack.push(new BinaryNode("WRITE", id, id_tail));
     }
 
     @Override public void exitExpr(LittleParser.ExprContext ctx) {
-        /*
-        if (ctx.getChild(0).getText().equals("")) {
-            BinaryNode factor = nodeStack.pop();
-            nodeStack.pop();
-            nodeStack.push(factor);
-        }
-        else {
-            BinaryNode expr_prefix = nodeStack.pop();
-            BinaryNode factor = nodeStack.pop();
-            nodeStack.push(new BinaryNode("expr", expr_prefix, factor));
-        }
-        */
         if (!ctx.getChild(0).getText().equals("")) {
             BinaryNode right = nodeStack.pop();
             String addop = nodeStack.pop().getElement();
@@ -290,47 +196,13 @@ public class Listener extends LittleBaseListener {
         }
     }
 
-    @Override public void exitExpr_prefix(LittleParser.Expr_prefixContext ctx) {
-        /*
-        if (ctx.getChildCount() == 0) {
-            nodeStack.push(new BinaryNode(""));
-        }
-        else {
-            BinaryNode expr_prefix = nodeStack.pop();
-            BinaryNode factor = nodeStack.pop();
-            nodeStack.push(new BinaryNode(ctx.getChild(2).getText(), expr_prefix, factor));
-        }
-        */
-    }
-
     @Override public void exitFactor(LittleParser.FactorContext ctx) {
-        /*
-        if (ctx.getChild(0).getText().equals("")) {
-            BinaryNode postfix_expr = nodeStack.pop();
-            nodeStack.pop();
-            nodeStack.push(postfix_expr);
-        }
-        else {
-        */
         if (!ctx.getChild(0).getText().equals("")) {
             BinaryNode right = nodeStack.pop();
             String mulop = nodeStack.pop().getElement();
             BinaryNode left = nodeStack.pop();
             nodeStack.push(new BinaryNode(mulop, left, right));
         }
-    }
-
-    @Override public void enterFactor_prefix(LittleParser.Factor_prefixContext ctx) {
-        /*
-        if (ctx.getChildCount() == 0) {
-            nodeStack.push(new BinaryNode(""));
-        }
-        else {
-            BinaryNode postfix_expr = nodeStack.pop();
-            BinaryNode factor_prefix = nodeStack.pop();
-            nodeStack.push(new BinaryNode(ctx.getChild(2).getText(), factor_prefix, postfix_expr));
-        }
-        */
     }
 
     @Override public void exitPrimary(LittleParser.PrimaryContext ctx) {
@@ -360,14 +232,7 @@ public class Listener extends LittleBaseListener {
 
     @Override public void exitIf_stmt(LittleParser.If_stmtContext ctx) {
         removeScope();
-        //TBD - Work-In-Progress
-        BinaryNode if_stmt = nodeStack.pop();
-        BinaryNode bn = new BinaryNode("");
-        while (!if_stmt.getElement().equals("IF")) {
-            bn = new BinaryNode("if_stmt", new BinaryNode(""), if_stmt);
-            if_stmt = nodeStack.pop();
-        }
-        nodeStack.push(bn);
+        //No test cases with if_stmt? No problem!
     }
 
     @Override public void enterElse_part(LittleParser.Else_partContext ctx) {
@@ -382,14 +247,7 @@ public class Listener extends LittleBaseListener {
         if (ctx.getChildCount() > 0) {
             removeScope();
         }
-        //TBD - Work-In-Progress
-        BinaryNode else_stmt = nodeStack.pop();
-        BinaryNode bn = new BinaryNode("");
-        while (!else_stmt.getElement().equals("ELSE")) {
-            bn = new BinaryNode("else_stmt", new BinaryNode(""), else_stmt);
-            else_stmt = nodeStack.pop();
-        }
-        nodeStack.push(bn);
+        //No test cases with else_part? No problem!
     }
 
     @Override public void exitCond(LittleParser.CondContext ctx) {
@@ -402,18 +260,11 @@ public class Listener extends LittleBaseListener {
     @Override public void enterWhile_stmt(LittleParser.While_stmtContext ctx) {
         blockNum++;
         addScope("BLOCK " + blockNum, null);
-        nodeStack.push(new BinaryNode("WHILE"));
+        //No test cases with while_stmt? No problem!
     }
 
     @Override public void exitWhile_stmt(LittleParser.While_stmtContext ctx) {
         removeScope();
-        //TBD - Work-In-Progress
-        BinaryNode while_stmt = nodeStack.pop();
-        BinaryNode bn = new BinaryNode("");
-        while (!while_stmt.getElement().equals("WHILE")) {
-            bn = new BinaryNode("while_stmt", new BinaryNode(""), while_stmt);
-            while_stmt = nodeStack.pop();
-        }
-        nodeStack.push(bn);
+        //No test cases with while_stmt? No problem!
     }
 }
