@@ -5,8 +5,7 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    //private final Stack<BinaryNode> nodeStack = new TestStack<>();
-    private final TestStack<BinaryNode> nodeStack = new TestStack<>();
+    private final Stack<BinaryNode> nodeStack = new TestStack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private ScopeNode root;
     private ScopeNode syntaxTree;
@@ -271,7 +270,6 @@ public class Listener extends LittleBaseListener {
     }
 
     @Override public void exitExpr(LittleParser.ExprContext ctx) {
-        //???
         /*
         if (ctx.getChild(0).getText().equals("")) {
             BinaryNode factor = nodeStack.pop();
@@ -284,6 +282,12 @@ public class Listener extends LittleBaseListener {
             nodeStack.push(new BinaryNode("expr", expr_prefix, factor));
         }
         */
+        if (!ctx.getChild(0).getText().equals("")) {
+            BinaryNode right = nodeStack.pop();
+            String addop = nodeStack.pop().getElement();
+            BinaryNode left = nodeStack.pop();
+            nodeStack.push(new BinaryNode(addop, left, right));
+        }
     }
 
     @Override public void exitExpr_prefix(LittleParser.Expr_prefixContext ctx) {
@@ -307,11 +311,13 @@ public class Listener extends LittleBaseListener {
             nodeStack.push(postfix_expr);
         }
         else {
-            BinaryNode postfix_expr = nodeStack.pop();
-            BinaryNode factor_prefix = nodeStack.pop();
-            nodeStack.push(new BinaryNode("factor", factor_prefix, postfix_expr));
-        }
         */
+        if (!ctx.getChild(0).getText().equals("")) {
+            BinaryNode right = nodeStack.pop();
+            String mulop = nodeStack.pop().getElement();
+            BinaryNode left = nodeStack.pop();
+            nodeStack.push(new BinaryNode(mulop, left, right));
+        }
     }
 
     @Override public void enterFactor_prefix(LittleParser.Factor_prefixContext ctx) {
