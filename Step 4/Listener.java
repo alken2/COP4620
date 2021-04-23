@@ -5,7 +5,7 @@ import java.util.*;
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
-    private final Stack<BinaryNode> nodeStack = new TestStack<>();
+    private final Stack<BinaryNode> nodeStack = new Stack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private ScopeNode root;
     private ScopeNode syntaxTree;
