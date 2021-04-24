@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Stack;
+import java.util.*;
 
 public class AssemblyGenerator {
     private ScopeNode root;
@@ -36,9 +33,9 @@ public class AssemblyGenerator {
                 int len = strings[1].length() - 1;
                 String scope = strings[1].substring(0, len);
                 scopeStack.push(scope);
-                treeStrings.add("label " + scope); //might comment out if it causes problems
+                //treeStrings.add("label " + scope); //might comment out if it causes problems
                 ArrayList<String> snStrings = processTree((ScopeNode)sn.getChild(i), treeStrings);
-                treeStrings.add("ret"); //might comment out if it causes problems
+                //treeStrings.add("ret"); //might comment out if it causes problems
                 treeStrings.addAll(snStrings);
                 scopeStack.pop();
             }
@@ -78,54 +75,82 @@ public class AssemblyGenerator {
             ArrayList<String> oldStrings = new ArrayList<>(treeStrings);
             ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
             ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
+
             for (int i = 0; i < oldStrings.size(); i++) {
                 right.remove(0);
                 left.remove(0);
             }
-            String[] leftside = left.get(0).split(":");
-            if (right.size() == 1) {
-                String[] rightside = right.get(0).split(":");
-                if (rightside[0].equals("INT") && leftside[0].equals("INT")) {
-                    treeStrings.add("ADDI " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else if (rightside[0].equals("FLOAT") && leftside[0].equals("FLOAT")) {
-                    treeStrings.add("ADDF " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else {
-                    System.out.println("Type mixing is not allowed in Little: " + leftside[0] + " " + rightside[0]);
-                    System.exit(1);
-                }
+
+            String leftside = left.get(0);
+            String[] lsplit = leftside.split(":");
+            String type = lsplit[0];
+
+            String[] assignVars = new String[right.size()];
+            for (int i = 0; i < assignVars.length; i++) {
+                assignVars[i] = right.get(i).split(":")[1];
+            }
+            System.out.println("+ type: " + type);
+            if (assignVars.length > 2) {
+                System.out.println("+ assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
             }
             else {
-                System.out.println("yolo :)");
+                System.out.println("+ assignVars: " + assignVars[0] + " " + assignVars[1]);
             }
+            if (assignVars.length > 2) {
+                //TBD
+            }
+            else {
+                if (type.equals("INT")) {
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
+                    treeStrings.add("addi " + assignVars[1] + " r" + regCtr);
+                }
+                else {
+                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("addr " + assignVars[1] + " r" + regCtr);
+                }
+            }
+            regCtr++;
             return treeStrings;
         }
         if (bn.getElement().equals("-")) {
             ArrayList<String> oldStrings = new ArrayList<>(treeStrings);
             ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
             ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
+
             for (int i = 0; i < oldStrings.size(); i++) {
                 right.remove(0);
                 left.remove(0);
             }
-            String[] leftside = left.get(0).split(":");
-            if (right.size() == 1) {
-                String[] rightside = right.get(0).split(":");
-                if (rightside[0].equals("INT") && leftside[0].equals("INT")) {
-                    treeStrings.add("SUBI " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else if (rightside[0].equals("FLOAT") && leftside[0].equals("FLOAT")) {
-                    treeStrings.add("SUBF " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else {
-                    System.out.println("Type mixing is not allowed in Little: " + leftside[0] + " " + rightside[0]);
-                    System.exit(1);
-                }
+
+            String leftside = left.get(0);
+            String[] lsplit = leftside.split(":");
+            String type = lsplit[0];
+
+            String[] assignVars = new String[right.size()];
+            for (int i = 0; i < assignVars.length; i++) {
+                assignVars[i] = right.get(i).split(":")[1];
+            }
+            System.out.println("- type: " + type);
+            if (assignVars.length > 2) {
+                System.out.println("- assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
             }
             else {
-                System.out.println("yolo :)");
+                System.out.println("- assignVars: " + assignVars[0] + " " + assignVars[1]);
             }
+            if (assignVars.length > 2) {
+                //TBD
+            }
+            else {
+                if (type.equals("INT")) {
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
+                    treeStrings.add("subi " + assignVars[1] + " r" + regCtr);
+                }
+                else {
+                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("subr " + assignVars[1] + " r" + regCtr);
+                }
+            }
+            regCtr++;
             return treeStrings;
         }
         if (bn.getElement().equals("*")) {
@@ -167,53 +192,47 @@ public class AssemblyGenerator {
                 }
             }
             regCtr++;
-            /*
-            String[] leftside = left.get(0).split(":");
-
-            if (right.size() == 1) {
-                String[] rightside = right.get(0).split(":");
-                if (rightside[0].equals("INT") && leftside[0].equals("INT")) {
-                    treeStrings.add("MULI " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else if (rightside[0].equals("FLOAT") && leftside[0].equals("FLOAT")) {
-                    treeStrings.add("MULF " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else {
-                    System.out.println("Type mixing is not allowed in Little: " + leftside[0] + " " + rightside[0]);
-                    System.exit(1);
-                }
-            }
-            else {
-                System.out.println("yolo :)");
-            }
-            */
             return treeStrings;
         }
         if (bn.getElement().equals("/")) {
             ArrayList<String> oldStrings = new ArrayList<>(treeStrings);
             ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
             ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
+
             for (int i = 0; i < oldStrings.size(); i++) {
                 right.remove(0);
                 left.remove(0);
             }
-            String[] leftside = left.get(0).split(":");
-            if (right.size() == 1) {
-                String[] rightside = right.get(0).split(":");
-                if (rightside[0].equals("INT") && leftside[0].equals("INT")) {
-                    treeStrings.add("DIVI " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else if (rightside[0].equals("FLOAT") && leftside[0].equals("FLOAT")) {
-                    treeStrings.add("DIVF " + leftside[1] + " " + rightside[1] + "$T" + regCtr++);
-                }
-                else {
-                    System.out.println("Type mixing is not allowed in Little: " + leftside[0] + " " + rightside[0]);
-                    System.exit(1);
-                }
+
+            String leftside = left.get(0);
+            String[] lsplit = leftside.split(":");
+            String type = lsplit[0];
+
+            String[] assignVars = new String[right.size()];
+            for (int i = 0; i < assignVars.length; i++) {
+                assignVars[i] = right.get(i).split(":")[1];
+            }
+            System.out.println("/ type: " + type);
+            if (assignVars.length > 2) {
+                System.out.println("/ assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
             }
             else {
-                System.out.println("yolo :)");
+                System.out.println("/ assignVars: " + assignVars[0] + " " + assignVars[1]);
             }
+            if (assignVars.length > 2) {
+                //TBD
+            }
+            else {
+                if (type.equals("INT")) {
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
+                    treeStrings.add("divi " + assignVars[1] + " r" + regCtr);
+                }
+                else {
+                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("divr " + assignVars[1] + " r" + regCtr);
+                }
+            }
+            regCtr++;
             return treeStrings;
         }
         // assignment
@@ -230,6 +249,7 @@ public class AssemblyGenerator {
             String leftside = left.get(0);
             String[] lsplit = leftside.split(":");
             String type = lsplit[0];
+            boolean flag = false;
 
             String[] assignVars = new String[right.size()];
             for (int i = 0; i < assignVars.length; i++) {
@@ -237,7 +257,8 @@ public class AssemblyGenerator {
                     assignVars[i] = right.get(i).split(":")[1];
                 }
                 else {
-                    assignVars[i] = right.get(i).split(":")[0];
+                    flag = true;
+                    break;
                 }
             }
             System.out.println("type: " + type);
@@ -247,8 +268,10 @@ public class AssemblyGenerator {
             else {
                 System.out.println("assignVars: " + assignVars[0] + " " + assignVars[1]);
             }
-            treeStrings.remove(treeStrings.size() - 1);
-            treeStrings.remove(treeStrings.size() - 1);
+
+            String tempa = treeStrings.remove(treeStrings.size() - 1);
+            String tempb = treeStrings.remove(treeStrings.size() - 1);
+
             if (assignVars.length > 2) {
                 //TBD
             }
@@ -256,6 +279,15 @@ public class AssemblyGenerator {
                 treeStrings.add("move " + assignVars[1] + " " + "r" + regCtr);
                 treeStrings.add("move r" + regCtr + " " + assignVars[0]);
             }
+            if (flag) {
+                treeStrings.remove(treeStrings.size() - 1);
+                treeStrings.remove(treeStrings.size() - 1);
+                treeStrings.remove(treeStrings.size() - 1);
+                treeStrings.add(tempb);
+                treeStrings.add(tempa);
+                treeStrings.add("move r" + --regCtr + " " + assignVars[0]);
+            }
+
             regCtr++;
             return treeStrings;
         }
@@ -316,8 +348,50 @@ public class AssemblyGenerator {
             return treeStrings;
         }
         if (bn.getElement().equals("WRITE")) {
-            ArrayList<String> left = processBinaryTree(bn.getLeft(), treeStrings); // left.size() == 1
-            ArrayList<String> right = processBinaryTree(bn.getRight(), treeStrings); // right.size() == 1
+            ArrayList<String> oldStrings = new ArrayList<>(treeStrings);
+            ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
+            ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
+
+            for (int i = 0; i < oldStrings.size(); i++) {
+                right.remove(0);
+                left.remove(0);
+            }
+
+            String leftside = left.get(0);
+            String[] lsplit = leftside.split(":");
+            String type = lsplit[0];
+
+            System.out.println(right.toString());
+            System.out.println("^^^^^^^^^^^^^^^^^^");
+
+            String[] assignVars = new String[right.size()];
+            String[] varTypes = new String[right.size()];
+            for (int i = 0; i < assignVars.length; i++) {
+                varTypes[i] = right.get(i).split(":")[0];
+                assignVars[i] = right.get(i).split(":")[1];
+            }
+
+            System.out.println("WRITE assignVars: " + Arrays.toString(varTypes));
+            System.out.println("WRITE assignVars: " + Arrays.toString(assignVars));
+            System.out.println("^^^^^^^^^^^^^^^^^^");
+
+            for (int i = 0; i < assignVars.length; i++) {
+                treeStrings.remove(treeStrings.size() - 1);
+            }
+
+            for (int i = 0; i < assignVars.length; i++) {
+                if (varTypes[i].equals("INT")) {
+                    treeStrings.add("sys writei " + assignVars[i]);
+                }
+                else if (varTypes[i].equals("FLOAT")) {
+                    treeStrings.add("sys writer " + assignVars[i]);
+                }
+                else {
+                    treeStrings.add("sys writes " + assignVars[i]);
+                }
+            }
+
+
             return treeStrings;
         }
         return treeStrings;
