@@ -1,4 +1,3 @@
-import gen.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -35,10 +34,7 @@ public class Driver {
         walker.walk(listener,tree);
         LinkedHashMap<String, SymbolTable> map = listener.getSymbolTable();
         AbstractNode ast = listener.getSyntaxTree();
-        ast.print();
-        //IRGenerator irGenerator = new IRGenerator();
         AssemblyGenerator asmGenerator = new AssemblyGenerator();
-        //irGenerator.createIR((ScopeNode)ast);
-        asmGenerator.createAssembly((ScopeNode)ast, map);
+        asmGenerator.createAssembly((ScopeNode)ast);
     }
 }
