@@ -1,17 +1,11 @@
 import java.util.*;
 
 public class AssemblyGenerator {
-    private ScopeNode root;
-    private LinkedHashMap<String, SymbolTable> st;
-    private ArrayList<String> asm = new ArrayList<>();
-    private Stack<String> scopeStack = new Stack<>();
+    private final ArrayList<String> asm = new ArrayList<>();
     private int regCtr = 0;
 
     public AssemblyGenerator() {}
-
-    public ArrayList<String> createAssembly(ScopeNode sn, LinkedHashMap<String, SymbolTable> table) {
-        root = sn;
-        st = table;
+    public void createAssembly(ScopeNode sn) {
         asm.add(";tiny code");
         asm.addAll(processTree(sn, new ArrayList<>()));
         asm.add("yolo :)");
@@ -21,26 +15,16 @@ public class AssemblyGenerator {
         }
         asm.add("sys halt");
         System.out.println(asm.get(asm.size() - 1));
-        return asm;
     }
 
     private ArrayList<String> processTree(ScopeNode sn, ArrayList<String> treeStrings) {
         for (int i = 0; i < sn.numChildren(); i++) {
             if (sn.getChild(i) instanceof BinaryNode) {
-                ArrayList<String> bnStrings = processBinaryTree((BinaryNode)sn.getChild(i), treeStrings);
-                System.out.println(bnStrings.toString());
-                treeStrings = bnStrings;
+                treeStrings = processBinaryTree((BinaryNode)sn.getChild(i), treeStrings);
             }
             else {
-                String[] strings = sn.getChild(i).getElement().split(":");
-                int len = strings[1].length() - 1;
-                String scope = strings[1].substring(0, len);
-                scopeStack.push(scope);
-                //treeStrings.add("label " + scope); //might comment out if it causes problems
                 ArrayList<String> snStrings = processTree((ScopeNode)sn.getChild(i), treeStrings);
-                //treeStrings.add("ret"); //might comment out if it causes problems
                 treeStrings.addAll(snStrings);
-                scopeStack.pop();
             }
         }
         //Do things to make treeStrings ready to add to ir
@@ -92,23 +76,13 @@ public class AssemblyGenerator {
             for (int i = 0; i < assignVars.length; i++) {
                 assignVars[i] = right.get(i).split(":")[1];
             }
-            System.out.println("+ type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("+ assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("+ assignVars: " + assignVars[0] + " " + assignVars[1]);
-            }
-            if (assignVars.length > 2) {
-                //TBD
-            }
-            else {
+            if (assignVars.length <= 2) {
                 if (type.equals("INT")) {
                     treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("addi " + assignVars[1] + " r" + regCtr);
                 }
                 else {
-                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("addr " + assignVars[1] + " r" + regCtr);
                 }
             }
@@ -133,23 +107,13 @@ public class AssemblyGenerator {
             for (int i = 0; i < assignVars.length; i++) {
                 assignVars[i] = right.get(i).split(":")[1];
             }
-            System.out.println("- type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("- assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("- assignVars: " + assignVars[0] + " " + assignVars[1]);
-            }
-            if (assignVars.length > 2) {
-                //TBD
-            }
-            else {
+            if (assignVars.length <= 2) {
                 if (type.equals("INT")) {
                     treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("subi " + assignVars[1] + " r" + regCtr);
                 }
                 else {
-                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("subr " + assignVars[1] + " r" + regCtr);
                 }
             }
@@ -174,23 +138,13 @@ public class AssemblyGenerator {
             for (int i = 0; i < assignVars.length; i++) {
                 assignVars[i] = right.get(i).split(":")[1];
             }
-            System.out.println("* type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("* assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("* assignVars: " + assignVars[0] + " " + assignVars[1]);
-            }
-            if (assignVars.length > 2) {
-                //TBD
-            }
-            else {
+            if (assignVars.length <= 2) {
                 if (type.equals("INT")) {
                     treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("muli " + assignVars[1] + " r" + regCtr);
                 }
                 else {
-                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("mulr " + assignVars[1] + " r" + regCtr);
                 }
             }
@@ -215,23 +169,13 @@ public class AssemblyGenerator {
             for (int i = 0; i < assignVars.length; i++) {
                 assignVars[i] = right.get(i).split(":")[1];
             }
-            System.out.println("/ type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("/ assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("/ assignVars: " + assignVars[0] + " " + assignVars[1]);
-            }
-            if (assignVars.length > 2) {
-                //TBD
-            }
-            else {
+            if (assignVars.length <= 2) {
                 if (type.equals("INT")) {
                     treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("divi " + assignVars[1] + " r" + regCtr);
                 }
                 else {
-                    treeStrings.add("move " + assignVars[1] + " r" + regCtr);
+                    treeStrings.add("move " + assignVars[0] + " r" + regCtr);
                     treeStrings.add("divr " + assignVars[1] + " r" + regCtr);
                 }
             }
@@ -241,20 +185,17 @@ public class AssemblyGenerator {
         // assignment
         if (bn.getElement().equals("assign_expr")) {
             ArrayList<String> oldStrings = new ArrayList<>(treeStrings);
-            ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
+            processBinaryTree(bn.getLeft(), treeStrings); //left should always have size() == 1
             ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
 
-            for (int i = 0; i < oldStrings.size(); i++) {
-                right.remove(0);
-                left.remove(0);
+            if (oldStrings.size() > 0) {
+                right.subList(0, oldStrings.size()).clear();
             }
 
-            String leftside = left.get(0);
-            String[] lsplit = leftside.split(":");
-            String type = lsplit[0];
-            boolean flag = false;
 
+            boolean flag = false;
             String[] assignVars = new String[right.size()];
+
             for (int i = 0; i < assignVars.length; i++) {
                 if (right.get(i).split(":").length > 1) {
                     assignVars[i] = right.get(i).split(":")[1];
@@ -264,21 +205,11 @@ public class AssemblyGenerator {
                     break;
                 }
             }
-            System.out.println("type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("assignVars: " + assignVars[0] + " " + assignVars[1]);
-            }
 
             String tempa = treeStrings.remove(treeStrings.size() - 1);
             String tempb = treeStrings.remove(treeStrings.size() - 1);
 
-            if (assignVars.length > 2) {
-                //TBD
-            }
-            else {
+            if (assignVars.length <= 2) {
                 treeStrings.add("move " + assignVars[1] + " " + "r" + regCtr);
                 treeStrings.add("move r" + regCtr + " " + assignVars[0]);
             }
@@ -301,13 +232,13 @@ public class AssemblyGenerator {
         }
         */
         if (bn.getElement().equals("var_decl")) {
-            ArrayList<String> left = processBinaryTree(bn.getLeft(), treeStrings);
-            ArrayList<String> right = processBinaryTree(bn.getRight(), treeStrings);
+            processBinaryTree(bn.getLeft(), treeStrings);
+            processBinaryTree(bn.getRight(), treeStrings);
             return treeStrings;
         }
         if (bn.getElement().equals("id_tail")) {
-            ArrayList<String> left = processBinaryTree(bn.getLeft(), treeStrings);
-            ArrayList<String> right = processBinaryTree(bn.getRight(), treeStrings);
+            processBinaryTree(bn.getLeft(), treeStrings);
+            processBinaryTree(bn.getRight(), treeStrings);
             return treeStrings;
         }
         if (bn.getElement().equals("READ")) {
@@ -327,13 +258,6 @@ public class AssemblyGenerator {
             String[] assignVars = new String[right.size()];
             for (int i = 0; i < assignVars.length; i++) {
                 assignVars[i] = right.get(i).split(":")[1];
-            }
-            System.out.println("READ type: " + type);
-            if (assignVars.length > 2) {
-                System.out.println("READ assignVars: " + assignVars[0] + " " + assignVars[1] + " " + assignVars[2]);
-            }
-            else {
-                System.out.println("READ assignVars: " + assignVars[0] + " " + assignVars[1]);
             }
 
             treeStrings.remove(treeStrings.size() - 1);
@@ -379,19 +303,12 @@ public class AssemblyGenerator {
                     left.remove(0);
                 }
 
-                System.out.println(right.toString());
-                System.out.println("^^^^^^^^^^^^^^^^^^");
-
                 String[] assignVars = new String[right.size()];
                 String[] varTypes = new String[right.size()];
                 for (int i = 0; i < assignVars.length; i++) {
                     varTypes[i] = right.get(i).split(":")[0];
                     assignVars[i] = right.get(i).split(":")[1];
                 }
-
-                System.out.println("WRITE assignVars: " + Arrays.toString(varTypes));
-                System.out.println("WRITE assignVars: " + Arrays.toString(assignVars));
-                System.out.println("^^^^^^^^^^^^^^^^^^");
 
                 for (int i = 0; i < assignVars.length; i++) {
                     treeStrings.remove(treeStrings.size() - 1);
