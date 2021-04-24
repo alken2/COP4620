@@ -14,11 +14,13 @@ public class AssemblyGenerator {
         st = table;
         asm.add(";tiny code");
         asm.addAll(processTree(sn, new ArrayList<>()));
-        asm.add("sys halt");
+        asm.add("yolo :)");
         System.out.println();
-        for (String string: asm) {
-            System.out.println(string);
+        for(int i = 0; i < asm.size() / 2; i++) {
+            System.out.println(asm.get(i));
         }
+        asm.add("sys halt");
+        System.out.println(asm.get(asm.size() - 1));
         return asm;
     }
 
