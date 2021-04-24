@@ -1,9 +1,12 @@
+import gen.*;
+
 import java.util.*;
 
 public class Listener extends LittleBaseListener {
     private static int blockNum = 0;
     private final Stack<String> scopeStack = new Stack<>();
     private final Stack<BinaryNode> nodeStack = new Stack<>();
+    //private final TestStack<BinaryNode> nodeStack = new TestStack<>();
     private final LinkedHashMap<String, SymbolTable> nestedST = new LinkedHashMap<>();
     private ScopeNode root;
     private ScopeNode syntaxTree;
@@ -173,15 +176,17 @@ public class Listener extends LittleBaseListener {
 
     @Override public void exitRead_stmt(LittleParser.Read_stmtContext ctx) {
         BinaryNode id_tail = nodeStack.pop();
-        String[] strings = nodeStack.pop().getElement().split(" ");
-        BinaryNode bn = new BinaryNode("id:" + strings[1]);
+        //String[] strings = nodeStack.pop().getElement().split(" ");
+        //BinaryNode bn = new BinaryNode("id:" + strings[1]);
+        BinaryNode bn = new BinaryNode(nodeStack.pop().getElement());
         syntaxTree.addChild(new BinaryNode("READ", bn, id_tail));
     }
 
     @Override public void exitWrite_stmt(LittleParser.Write_stmtContext ctx) {
         BinaryNode id_tail = nodeStack.pop();
-        String[] strings = nodeStack.pop().getElement().split(" ");
-        BinaryNode bn = new BinaryNode("id:" + strings[1]);
+        //String[] strings = nodeStack.pop().getElement().split(" ");
+        //BinaryNode bn = new BinaryNode("id:" + strings[1]);
+        BinaryNode bn = new BinaryNode(nodeStack.pop().getElement());
         syntaxTree.addChild(new BinaryNode("WRITE", bn, id_tail));
     }
 
