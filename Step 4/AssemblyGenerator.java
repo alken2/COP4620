@@ -14,6 +14,7 @@ public class AssemblyGenerator {
         st = table;
         asm.add(";tiny code");
         asm.addAll(processTree(sn, new ArrayList<>()));
+        asm.add("sys halt");
         System.out.println();
         for (String string: asm) {
             System.out.println(string);
@@ -47,7 +48,7 @@ public class AssemblyGenerator {
     private ArrayList<String> processBinaryTree(BinaryNode bn, ArrayList<String> treeStrings) {
         if (bn.isLeaf()) {
             if (bn.getElement().equals("")) {
-                return null;
+                return new ArrayList<>();
             }
             // element = name type value | INTLITERAL | FLOATLITERAL
             String element = bn.getElement();
@@ -352,42 +353,56 @@ public class AssemblyGenerator {
             ArrayList<String> left = new ArrayList<>(processBinaryTree(bn.getLeft(), treeStrings)); //left should always have size() == 1
             ArrayList<String> right = new ArrayList<>(processBinaryTree(bn.getRight(), treeStrings));
 
-            for (int i = 0; i < oldStrings.size(); i++) {
-                right.remove(0);
-                left.remove(0);
-            }
+            if (right.size() == 0) {
+                String leftside = left.get(left.size() - 1);
+                String[] lsplit = leftside.split(":");
+                String type = lsplit[0];
+                String var = lsplit[1];
 
-            String leftside = left.get(0);
-            String[] lsplit = leftside.split(":");
-            String type = lsplit[0];
-
-            System.out.println(right.toString());
-            System.out.println("^^^^^^^^^^^^^^^^^^");
-
-            String[] assignVars = new String[right.size()];
-            String[] varTypes = new String[right.size()];
-            for (int i = 0; i < assignVars.length; i++) {
-                varTypes[i] = right.get(i).split(":")[0];
-                assignVars[i] = right.get(i).split(":")[1];
-            }
-
-            System.out.println("WRITE assignVars: " + Arrays.toString(varTypes));
-            System.out.println("WRITE assignVars: " + Arrays.toString(assignVars));
-            System.out.println("^^^^^^^^^^^^^^^^^^");
-
-            for (int i = 0; i < assignVars.length; i++) {
                 treeStrings.remove(treeStrings.size() - 1);
+
+                if (type.equals("INT")) {
+                    treeStrings.add("sys writei " + var);
+                } else if (type.equals("FLOAT")) {
+                    treeStrings.add("sys writer " + var);
+                } else {
+                    treeStrings.add("sys writes " + var);
+                }
+
             }
 
-            for (int i = 0; i < assignVars.length; i++) {
-                if (varTypes[i].equals("INT")) {
-                    treeStrings.add("sys writei " + assignVars[i]);
+            else {
+                for (int i = 0; i < oldStrings.size(); i++) {
+                    right.remove(0);
+                    left.remove(0);
                 }
-                else if (varTypes[i].equals("FLOAT")) {
-                    treeStrings.add("sys writer " + assignVars[i]);
+
+                System.out.println(right.toString());
+                System.out.println("^^^^^^^^^^^^^^^^^^");
+
+                String[] assignVars = new String[right.size()];
+                String[] varTypes = new String[right.size()];
+                for (int i = 0; i < assignVars.length; i++) {
+                    varTypes[i] = right.get(i).split(":")[0];
+                    assignVars[i] = right.get(i).split(":")[1];
                 }
-                else {
-                    treeStrings.add("sys writes " + assignVars[i]);
+
+                System.out.println("WRITE assignVars: " + Arrays.toString(varTypes));
+                System.out.println("WRITE assignVars: " + Arrays.toString(assignVars));
+                System.out.println("^^^^^^^^^^^^^^^^^^");
+
+                for (int i = 0; i < assignVars.length; i++) {
+                    treeStrings.remove(treeStrings.size() - 1);
+                }
+
+                for (int i = 0; i < assignVars.length; i++) {
+                    if (varTypes[i].equals("INT")) {
+                        treeStrings.add("sys writei " + assignVars[i]);
+                    } else if (varTypes[i].equals("FLOAT")) {
+                        treeStrings.add("sys writer " + assignVars[i]);
+                    } else {
+                        treeStrings.add("sys writes " + assignVars[i]);
+                    }
                 }
             }
 
