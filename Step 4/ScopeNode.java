@@ -47,8 +47,8 @@ public class ScopeNode extends AbstractNode {
         //System.out.println("Added child to " + this.getElement() + " <----> "  + child.getElement());
     }
 
-    public void addParameters(ArrayList<String> slist) { //remember this method when dealing with function parameters
-        this.parameters = slist;
+    public void addParameters(ArrayList<String> strings) { //No test cases where param_decl_list is not empty? No problem!
+        this.parameters = strings;
     }
 
     public int numChildren() {
